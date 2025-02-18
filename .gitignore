@@ -3,6 +3,4 @@
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
-*_pycache_/
-*.pyc
-*.pyo
+
