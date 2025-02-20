@@ -12,3 +12,7 @@ terraform {
 provider "azurerm" {
   features {}
 }
+resource "azurerm_resource_group" "anoopp_rg01" {
+  name     = "anoopp-rg01"
+  location = "uksouth"
+}
