@@ -28,7 +28,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Terraform Init
-        run: terraform init -backend-config="storage_account_name=${{ secrets.STORAGE_ACCOUNT }}" -backend-config="container_name=terraform" -backend-config="key=terraform.tfstate"
+        run: terraform init -backend-config="storage_account_name=${{ secrets.STORAGE_ACCOUNT }}" -backend-config="container_name=terraformstate" -backend-config="key=terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
