@@ -52,3 +52,24 @@ resource "azurerm_subnet" "subnet2" {
   virtual_network_name = azurerm_virtual_network.rax_vnet.name
   address_prefixes     = ["10.1.0.64/26"]
 }
+
+resource "azurerm_cosmosdb_account" "mongo" {
+  name                = "example-mongo-account"
+  location            = "East US"
+  resource_group_name = "example-resources"
+  offer_type          = "Standard"
+  kind                = "MongoDB"
+
+  capabilities {
+    name = "MongoDBv3.4"
+  }
+
+  consistency_policy {
+    consistency_level       = "Session"
+  }
+
+  geo_location {
+    location          = "East US"
+    failover_priority = 0
+  }
+}
