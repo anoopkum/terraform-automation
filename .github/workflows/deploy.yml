@@ -13,6 +13,8 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      AZURE_API_KEY: ${{ secrets.AZURE_API_KEY }}
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -38,3 +40,17 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+
+      - name: Create Pull Request
+        run: |
+          # Create a PR with a title and body if one does not already exist.
+          gh pr create --title "Auto PR: Update Terraform configuration" --body "Automated PR generated after successful validations" --base main || echo "PR creation skipped or already exists"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge Pull Request
+        run: |
+          # Auto merge the PR using squash merge. The command will exit with success if no open PR is found.
+          gh pr merge --auto --squash || echo "No PR to merge or merge failed"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
