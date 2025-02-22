@@ -31,3 +31,24 @@ resource "azurerm_resource_group" "anoopp_rxt02" {
   name     = "anoopp-rxt02"
   location = "East US"
 }
+
+resource "azurerm_virtual_network" "rax_vnet" {
+  name                = "rax_vnet"
+  address_space       = ["10.1.0.0/24"]
+  location            = "East US"
+  resource_group_name = "anoopp-rg01"
+}
+
+resource "azurerm_subnet" "subnet1" {
+  name                 = "subnet1"
+  resource_group_name  = "anoopp-rg01"
+  virtual_network_name = azurerm_virtual_network.rax_vnet.name
+  address_prefixes     = ["10.1.0.0/26"]
+}
+
+resource "azurerm_subnet" "subnet2" {
+  name                 = "subnet2"
+  resource_group_name  = "anoopp-rg01"
+  virtual_network_name = azurerm_virtual_network.rax_vnet.name
+  address_prefixes     = ["10.1.0.64/26"]
+}
