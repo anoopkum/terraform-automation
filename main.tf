@@ -20,16 +20,28 @@ provider "azurerm" {
 resource "azurerm_resource_group" "anoopp_rg08" {
   name     = "anoopp-rg08"
   location = "uksouth"
+
+lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_resource_group" "anoopp_rg01" {
   name     = "anoopp-rg01"
   location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_resource_group" "anoopp_rxt02" {
   name     = "anoopp-rxt02"
   location = "East US"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_virtual_network" "rax_vnet" {
@@ -37,6 +49,10 @@ resource "azurerm_virtual_network" "rax_vnet" {
   address_space       = ["10.1.0.0/24"]
   location            = "East US"
   resource_group_name = "anoopp-rg01"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_subnet" "subnet1" {

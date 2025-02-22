@@ -29,7 +29,7 @@ def generate_terraform_code(user_input):
     response = openai.ChatCompletion.create(
     deployment_id="gpt-4",  # Use your deployment name if it's different
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates Terraform code for Azure as per user query, do not include any provider, additional resources or instructions."},
+            {"role": "system", "content": "You are a helpful assistant that generates Terraform code for Azure as per user query, do not include any provider, additional resources or instructions. You also need to ensure the generated code is valid and can be deployed. please also add adding a lifecycle block with ignore_changes = [tags] to all resources."},
             {"role": "user", "content": prompt}
         ],
         max_tokens=500
@@ -160,9 +160,37 @@ def validate_and_fix():
     auto_commit_and_push()
 
 def check_deployment_status():
-    # Placeholder for actual deployment status check.
-    ok = True
-    return "Deployment successful" if ok else "Failed: Resource conflict"
+    """
+    Checks the status of the latest GitHub Actions workflow run for deployment.
+    Returns “Deployment successful” if the run concluded with success,
+    or a message indicating the failure status.
+    """
+    # Replace with your actual repository in the format "owner/repo"
+    repo = "anoopkum/terraform-automation"
+    
+    # Build headers for authentication using your GITHUB_TOKEN
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        return "Deployment status unknown: Missing GITHUB_TOKEN"
+    headers = {"Authorization": f"token {token}"}
+    
+    # Query GitHub Actions to get the list of workflow runs
+    runs_url = f"https://api.github.com/repos/{repo}/actions/runs"
+    response = requests.get(runs_url, headers=headers)
+    
+    if response.status_code == 200:
+        runs = response.json().get("workflow_runs", [])
+        if not runs:
+            return "Deployment status unknown: No workflow runs found"
+        # Assume the most recent workflow run is our deployment job
+        latest_run = runs[0]
+        conclusion = latest_run.get("conclusion")
+        if conclusion == "success":
+            return "Deployment successful"
+        else:
+            return f"Deployment failed with status: {conclusion}"
+    else:
+        return f"Failed to fetch deployment status (HTTP {response.status_code})"
 
 def main():
     try:
