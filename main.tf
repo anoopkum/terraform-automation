@@ -52,3 +52,12 @@ resource "azurerm_subnet" "subnet2" {
   virtual_network_name = azurerm_virtual_network.rax_vnet.name
   address_prefixes     = ["10.1.0.64/26"]
 }
+
+resource "azurerm_resource_group" "anoopp_rg03" {
+  name     = "anoopp-rg03"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
