@@ -130,7 +130,7 @@ def auto_commit_and_push():
     stdout, stderr = run_command(f'git commit -m "{commit_message}"')
     if stderr:
         logging.error(f"Git commit error: {stderr}")
-    stdout, stderr = run_command("git push origin main")
+    stdout, stderr = run_command("git push --force origin main")
     if stderr:
         logging.error(f"Git push error: {stderr}")
     else:

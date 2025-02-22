@@ -1,6 +1,9 @@
-.env
-.teerraform.lock.hcl
+.terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
-
+terraform.log
+.env
+.venv
+__pycache__/aiagent.cpython-311.pyc
+__pycache__/validate.cpython-311.pyc
