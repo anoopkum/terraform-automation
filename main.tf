@@ -26,7 +26,6 @@ resource "azurerm_resource_group" "anoopp_rg03" {
   name     = "anoopp-rg03"
   location = "uksouth"
 }
-
 resource "azurerm_resource_group" "anoopp_rg04" {
   name     = "anoopp-rg04"
   location = "uksouth"
