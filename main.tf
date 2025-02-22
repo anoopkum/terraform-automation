@@ -119,3 +119,15 @@ resource "azurerm_resource_group" "anoopp_rg07" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "anoopp_rg10" {
+  name     = "anoopp-rg10"
+  location = "uksouth"
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
