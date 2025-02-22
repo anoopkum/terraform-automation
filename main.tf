@@ -77,3 +77,12 @@ resource "azurerm_resource_group" "anoopp_rg03" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "anoopp_rg04" {
+  name     = "anoopp-rg04"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
