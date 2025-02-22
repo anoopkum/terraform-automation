@@ -34,3 +34,8 @@ resource "azurerm_resource_group" "anoopp_05" {
   name     = "anoopp-05"
   location = "uksouth"
 }
+
+resource "azurerm_resource_group" "example" {
+  name     = "anoopp-06"
+  location = "uksouth"
+}
