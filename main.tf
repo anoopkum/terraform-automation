@@ -7,6 +7,7 @@ terraform {
     }
   }
   backend "azurerm" {
+    resource_group_name  = "rg-anoopkumar-3792_ai"
     storage_account_name = "saterraformstaterxt"  # Replace with your Azure storage account name
     container_name       = "terraformstate"             # Replace with your container name if different
     key                  = "terraform.tfstate"          # The state file name
