@@ -6,9 +6,12 @@ terraform {
       version = "~> 3.00.0"
     }
   }
+  backend "azurerm" {
+    storage_account_name = "saterraformstaterxt"  # Replace with your Azure storage account name
+    container_name       = "terraformstate"             # Replace with your container name if different
+    key                  = "terraform.tfstate"          # The state file name
+  }
 }
-
-
 provider "azurerm" {
   features {}
 }
