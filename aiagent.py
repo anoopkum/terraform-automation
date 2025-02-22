@@ -130,11 +130,11 @@ def auto_commit_and_push():
     stdout, stderr = run_command(f'git commit -m "{commit_message}"')
     if stderr:
         logging.error(f"Git commit error: {stderr}")
-    stdout, stderr = run_command("git push --force origin main")
+    stdout, stderr = run_command("git push --force origin test")
     if stderr:
         logging.error(f"Git push error: {stderr}")
     else:
-        print("Committed and pushed updated code to main branch.")
+        print("Committed and pushed updated code to test branch.")
 
 def validate_and_fix():
     # Initialize Terraform
