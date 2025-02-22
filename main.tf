@@ -21,3 +21,8 @@ resource "azurerm_resource_group" "anoopp_rg08" {
   name     = "anoopp-rg08"
   location = "uksouth"
 }
+
+resource "azurerm_resource_group" "anoopp_rg01" {
+  name     = "anoopp-rg01"
+  location = "uksouth"
+}
