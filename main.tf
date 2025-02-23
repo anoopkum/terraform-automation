@@ -140,3 +140,20 @@ resource "azurerm_resource_group" "anoopp_rg11" {
     ignore_changes = [tags]
   }
 }
+
+
+
+resource "azurerm_resource_group" "anoopp-rg01" {
+  name     = "anoopp-rg01"
+  location = "West Europe"
+  tags = {
+    CreatedBy = "TerraformAIAgent"
+  }
+}
+
+variable "example" {
+  description = <<EOT
+  This is a multi-line description
+  which is more readable for longer texts.
+EOT
+}
