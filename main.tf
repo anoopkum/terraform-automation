@@ -131,3 +131,12 @@ resource "azurerm_resource_group" "anoopp_rg10" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "anoopp_rg11" {
+  name     = "anoopp-rg11"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
