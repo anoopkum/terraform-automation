@@ -158,3 +158,36 @@ resource "azurerm_resource_group" "anoop_rg" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_kubernetes_cluster" "rxt_aks" {
+  name                = "rxt_aks_cluster"
+  location            = azurerm_resource_group.rxt_rg.location
+  resource_group_name = azurerm_resource_group.rxt_rg.name
+  dns_prefix          = "rxtaks"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_DS2_v2"
+    enable_auto_scaling = true
+    min_count   = 1
+    max_count   = 3
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
+
+resource "azurerm_resource_group" "rxt_rg" {
+  name     = "rxt_rg"
+  location = "East US"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
