@@ -149,3 +149,12 @@ resource "azurerm_resource_group" "anoop_rg0001" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "anoop_rg" {
+  name     = "anoop-rg000001"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
