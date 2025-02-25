@@ -45,7 +45,7 @@ resource "azurerm_resource_group" "anoopp_rxt02" {
 }
 
 resource "azurerm_virtual_network" "rax_vnet" {
-  name                = "rax_vnet"
+  name                = "rax_vnet01"
   address_space       = ["10.1.0.0/24"]
   location            = "East US"
   resource_group_name = "anoopp-rg01"
@@ -143,23 +143,6 @@ resource "azurerm_resource_group" "anoopp_rg11" {
 
 resource "azurerm_resource_group" "anoop_rg0001" {
   name     = "anoop-rg0001"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoop_rg" {
-  name     = "anoop-rg000001"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-resource "azurerm_resource_group" "anoop_rg000001" {
-  name     = "anoop-rg000001"
   location = "uksouth"
 
   lifecycle {
