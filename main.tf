@@ -180,9 +180,3 @@ resource "azurerm_resource_group" "rg_terraform" {
   name     = "rg-terraform"
   location = "uksouth"
 }
-variable "example" {
-     default = <<EOT
-     This is a multi-line string
-     where I can safely use `backticks` among other characters
-     EOT
-   }
