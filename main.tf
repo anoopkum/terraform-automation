@@ -175,3 +175,8 @@ resource "azurerm_resource_group" "rg_aiagent03" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "rg_terraform" {
+  name     = "rg-terraform"
+  location = "uksouth"
+}
