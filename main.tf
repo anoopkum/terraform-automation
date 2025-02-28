@@ -166,3 +166,12 @@ resource "azurerm_resource_group" "rg_aiagent02" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "rg_aiagent03" {
+  name     = "rg-aiagent03"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
