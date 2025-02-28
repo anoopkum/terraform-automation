@@ -157,3 +157,12 @@ resource "azurerm_resource_group" "rg-aiagent01" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "rg_aiagent02" {
+  name     = "rg-aiagent02"
+  location = "uksouth"
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
