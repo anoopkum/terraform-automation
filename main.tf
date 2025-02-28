@@ -180,3 +180,7 @@ resource "azurerm_resource_group" "rg_terraform" {
   name     = "rg-terraform"
   location = "uksouth"
 }
+resource "azurerm_resource_group" "rg_aiagent04" {
+  name     = "rg-aiagent04"
+  location = "uksouth"
+}
