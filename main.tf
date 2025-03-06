@@ -173,7 +173,7 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    sku       = "Standard_DS1_v2"
     version   = "latest"
   }
 }
