@@ -17,27 +17,14 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "anoopp_rg08" {
-  name     = "anoopp-rg08"
-  location = "uksouth"
-
-lifecycle {
-    ignore_changes = [tags]
-  }
+data "azurerm_key_vault" "azure_kv" {
+  name                = "raxtfkvtf"  # Replace with your Key Vault name
+  resource_group_name = "raxtfrgtf"  # Replace with your resource group
 }
 
 resource "azurerm_resource_group" "anoopp_rg01" {
   name     = "anoopp-rg01"
   location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoopp_rxt02" {
-  name     = "anoopp-rxt02"
-  location = "East US"
 
   lifecycle {
     ignore_changes = [tags]
@@ -69,33 +56,6 @@ resource "azurerm_subnet" "subnet2" {
   address_prefixes     = ["10.1.0.64/26"]
 }
 
-resource "azurerm_resource_group" "anoopp_rg03" {
-  name     = "anoopp-rg03"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoopp_rg04" {
-  name     = "anoopp-rg04"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoopp_rg05" {
-  name     = "anoopp-rg05"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
 resource "azurerm_resource_group" "anoopp_rg06" {
   name     = "anoopp-rg06"
   location = "uksouth"
@@ -108,87 +68,6 @@ resource "azurerm_resource_group" "anoopp_rg06" {
   }
 }
 
-resource "azurerm_resource_group" "anoopp_rg07" {
-  name     = "anoopp-rg07"
-  location = "uksouth"
-  tags = {
-    "Deployed via" = "Terraform AI Agent"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoopp_rg10" {
-  name     = "anoopp-rg10"
-  location = "uksouth"
-  tags = {
-    "Deployed via" = "Terraform AI Agent"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoopp_rg11" {
-  name     = "anoopp-rg11"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "anoop_rg0001" {
-  name     = "anoop-rg0001"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-resource "azurerm_resource_group" "rg-aiagent01" {
-  name     = "rg-aiagent01"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "rg_aiagent02" {
-  name     = "rg-aiagent02"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "rg_aiagent03" {
-  name     = "rg-aiagent03"
-  location = "uksouth"
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "rg_terraform" {
-  name     = "rg-terraform"
-  location = "uksouth"
-}
-resource "azurerm_resource_group" "rg_aiagent04" {
-  name     = "rg-aiagent04"
-  location = "uksouth"
-}
-
-resource "azurerm_resource_group" "anoop_aiproject01" {
-  name     = "anoop_aiproject01"
-  location = "uksouth"
-}
 resource "azurerm_resource_group" "rg-standard" {
   name     = "rg-standard"
   location = "uksouth"
@@ -214,13 +93,13 @@ resource "azurerm_network_security_group" "nsg-standard" {
   resource_group_name = azurerm_resource_group.rg-standard.name
 
   security_rule {
-    name                       = "Allow-RDP"
+    name                       = "Allow-SSH"
     priority                   = 1000
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "3389"
+    destination_port_range     = "22"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -252,21 +131,24 @@ resource "azurerm_network_interface" "nic-standard" {
   }
 }
 
+ resource "azurerm_key_vault_secret" "vm_password_secret" {
+  name         = "vm-password"  # Name of the secret in Key Vault
+  value        = random_password.vm_password.result  # Use generated password
+  key_vault_id = data.azurerm_key_vault.azure_kv.id  
+}
+
 resource "azurerm_linux_virtual_machine" "vm-standard" {
   name                = "vm-standard"
   resource_group_name = azurerm_resource_group.rg-standard.name
   location            = azurerm_resource_group.rg-standard.location
   size                = "Standard_DS1_v2"
   admin_username      = "azureuser"
+  admin_password      = data.azurerm_key_vault_secret.vm_password.value  # Retrieve stored password
+  disable_password_authentication = false
 
   network_interface_ids = [
     azurerm_network_interface.nic-standard.id,
   ]
-
-  admin_ssh_key {
-    username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
 
   os_disk {
     caching              = "ReadWrite"
@@ -279,30 +161,4 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
-}
-
-resource "azurerm_resource_group" "rg" {
-  name     = "rg-network01"
-  location = "uksouth"
-}
-
-resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-network"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  address_space       = ["10.0.0.0/24"]
-}
-
-resource "azurerm_subnet" "subnet1-1146b2f2" {
-  name                 = "subnet1-2eceb315"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.0.0/25"]
-}
-
-resource "azurerm_subnet" "subnet2-1ad245dd" {
-  name                 = "subnet2-5b5adab7"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.0.128/25"]
 }
