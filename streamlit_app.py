@@ -1,46 +1,93 @@
 import streamlit as st
-from aiagent import generate_terraform_code, save_terraform_code, validate_and_fix, check_deployment_status
+from dotenv import load_dotenv
+import os
+from aiagent import (
+    generate_unique_terraform_code,
+    verify_generated_code,
+    validate_and_fix,
+    save_terraform_code,
+    check_deployment_status
+)
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import ResourceManagementClient
 
-# Initialize Azure credentials and resource management client
+# Initialize Azure credentials and Resource Management Client
 credential = DefaultAzureCredential()
-resource_client = ResourceManagementClient(credential, "b2e20b65-acfb-4c6c-b03c-e40cac5c3af7")
+subscription_id = os.getenv("AZURE_SUBSCRIPTION_ID")  # Replace with your subscription ID if different
+resource_client = ResourceManagementClient(credential, subscription_id)
 
 def run_app():
     st.title("Terraform AI Agent")
     
-    # Initialize session state for terraform_code
-    if "terraform_code" not in st.session_state:
-        st.session_state.terraform_code = ""
+    # Initialize session state variables
+    if "generated_code" not in st.session_state:
+        st.session_state.generated_code = ""
+    if "modified_code" not in st.session_state:
+        st.session_state.modified_code = ""
+    if "final_code" not in st.session_state:
+        st.session_state.final_code = ""
     
-    # Get user input via a text field
-    user_input = st.text_input("Enter the Azure infrastructure to create:")
-
-    # Button to generate Terraform code
+    # Get user input
+    user_input = st.text_input(
+        "Enter what Azure infrastructure to create (e.g. create a resource group name \"rg01\"):"
+    )
+    
+    # Generate Code Section
     if st.button("Generate Terraform Code"):
-        if not user_input:
-            st.warning("Please enter a valid infrastructure description.")
+        if user_input.strip() == "":
+            st.error("Please enter a valid description.")
         else:
             with st.spinner("Generating Terraform code..."):
-                code = generate_terraform_code(user_input)
-                st.session_state.terraform_code = code  # Store generated code in session state
-            st.subheader("Generated Terraform Code:")
-            st.code(st.session_state.terraform_code, language="hcl")
-
-    # Button for user confirmation and to deploy the generated code
-    if st.button("Confirm and Deploy"):
-        if not st.session_state.terraform_code:
-            st.warning("No Terraform code generated yet.")
-        else:
-            with st.spinner("Saving Terraform code..."):
-                save_terraform_code(st.session_state.terraform_code)
-            st.success("Terraform code saved to main.tf")
+                code = generate_unique_terraform_code(user_input)
+                st.session_state.generated_code = code
+                st.session_state.modified_code = code
+    
+    # Show code editor (always visible after generation)
+    if st.session_state.modified_code:
+        st.subheader("Generated Terraform Code (Modify if required)")
+        modified_code = st.text_area(
+            "Terraform Code",
+            value=st.session_state.modified_code,
+            height=500,
+            key="code_editor"
+        )
+        # Update the modified code in session state
+        st.session_state.modified_code = modified_code
+        
+        # Verify Code Section
+        st.subheader("Verify Terraform Code")
+        if st.button("Verify Terraform Code"):
+            with st.spinner("Verifying code..."):
+                verification_result = verify_generated_code(st.session_state.modified_code)
             
-            with st.spinner("Validating and deploying..."):
-                validate_and_fix()
-                status = check_deployment_status()
-            st.success(status)
-
-if __name__ == '__main__':
+            if verification_result.startswith(("Formatting error", "Terraform init error", "Validation error", "TFLint error")):
+                st.error(verification_result)
+            else:
+                st.success("Terraform code verified successfully.")
+                st.session_state.final_code = verification_result
+                st.subheader("Final Verified Terraform Code")
+                st.text_area(
+                    "Final Terraform Code",
+                    value=verification_result,
+                    height=500,
+                    key="final_code_viewer"
+                )
+        
+        # Deploy Section
+        if st.session_state.final_code:
+            st.subheader("Save and Deploy")
+            if st.button("Save and Deploy"):
+                with st.spinner("Saving code and triggering deployment..."):
+                    save_terraform_code(st.session_state.final_code)
+                    st.success("Terraform code saved to main.tf. Deployment in progress...")
+                # Add deployment status checking
+                with st.spinner("Checking deployment status..."):
+                    deployment_status = check_deployment_status()
+                    if "Deployment failed" in deployment_status:
+                        st.error(deployment_status)
+                    elif "Deployment successful" in deployment_status:
+                        st.success(deployment_status)
+                    else:
+                        st.warning("Deployment status unknown. Please check GitHub Actions.")
+if __name__ == "__main__":
     run_app()
