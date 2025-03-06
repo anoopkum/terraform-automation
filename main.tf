@@ -156,7 +156,7 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
   name                = "vm-standard"
   resource_group_name = azurerm_resource_group.rg-standard.name
   location            = azurerm_resource_group.rg-standard.location
-  size                = "Standard_DS1_v2"
+  size                = "Standard_B2ms"
   admin_username      = "azureuser"
   admin_password      = data.azurerm_key_vault_secret.vm_password_secret.value  # Retrieve stored password
   disable_password_authentication = false
@@ -173,7 +173,7 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
   source_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "Standard_DS1_v2"
+    sku       = "20_04-lts-gen2"
     version   = "latest"
   }
 }
