@@ -143,6 +143,11 @@ resource "random_password" "vm_password" {
   key_vault_id = data.azurerm_key_vault.azure_kv.id  
 }
 
+data "azurerm_key_vault_secret" "vm_password_secret" {
+  name         = "vm-password"  # Name of the secret in Key Vault
+  key_vault_id = data.azurerm_key_vault.azure_kv.id
+}
+
 resource "azurerm_linux_virtual_machine" "vm-standard" {
   name                = "vm-standard"
   resource_group_name = azurerm_resource_group.rg-standard.name
