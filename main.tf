@@ -131,6 +131,12 @@ resource "azurerm_network_interface" "nic-standard" {
   }
 }
 
+resource "random_password" "vm_password" {
+  length           = 16
+  special          = true
+  override_special = "!@#$%^&*()"
+}
+
  resource "azurerm_key_vault_secret" "vm_password_secret" {
   name         = "vm-password"  # Name of the secret in Key Vault
   value        = random_password.vm_password.result  # Use generated password
@@ -143,7 +149,7 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
   location            = azurerm_resource_group.rg-standard.location
   size                = "Standard_DS1_v2"
   admin_username      = "azureuser"
-  admin_password      = data.azurerm_key_vault_secret.vm_password.value  # Retrieve stored password
+  admin_password      = data.azurerm_key_vault_secret.vm_password_secret.value  # Retrieve stored password
   disable_password_authentication = false
 
   network_interface_ids = [
