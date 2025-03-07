@@ -200,3 +200,9 @@ resource "azurerm_resource_group" "akash_005" {
   name     = "akash-005"
   location = "uksouth"
 }
+
+
+resource "azurerm_resource_group" "akash_rg" {
+  name     = "akash-test01"
+  location = "UK South"
+}
