@@ -181,3 +181,13 @@ resource "azurerm_resource_group" "rg_test" {
   name     = "rg-test0001"
   location = "uksouth"
 }
+
+# resource "azurerm_resource_group" "rg_test" {
+#   name     = "rg-test0001"
+#   location = "uksouth"
+# }
+
+resource "azurerm_resource_group" "akash_rg001" {
+  name     = "akash-rg001"
+  location = "uksouth"
+}
