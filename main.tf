@@ -211,3 +211,8 @@ resource "azurerm_resource_group" "amit_test02" {
   name     = "amit-test02"
   location = "uksouth"
 }
+
+resource "azurerm_resource_group" "sumit_test01" {
+  name     = "sumit-test01"
+  location = "uksouth"
+}
