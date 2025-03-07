@@ -206,3 +206,8 @@ resource "azurerm_resource_group" "akash_rg" {
   name     = "akash-test01"
   location = "UK South"
 }
+
+resource "azurerm_resource_group" "amit_test02" {
+  name     = "amit-test02"
+  location = "uksouth"
+}
