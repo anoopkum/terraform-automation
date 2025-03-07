@@ -7,3 +7,4 @@ terraform.log
 .venv
 __pycache__/aiagent.cpython-311.pyc
 __pycache__/validate.cpython-311.pyc
+ __pycache__/aiagent.cpython-310.pyc

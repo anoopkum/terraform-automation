@@ -3,7 +3,7 @@ name: Terraform Deployment
 on:
   push:
     branches:
-      - main
+      - test
 
 jobs:
   deploy:
@@ -44,7 +44,7 @@ jobs:
       - name: Create Pull Request
         run: |
           # Create a PR with a title and body if one does not already exist.
-          gh pr create --title "Auto PR: Update Terraform configuration" --body "Automated PR generated after successful validations" --base main || echo "PR creation skipped or already exists"
+          gh pr create --title "Auto PR: Update Terraform configuration" --body "Automated PR generated after successful validations" --base test || echo "PR creation skipped or already exists"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
