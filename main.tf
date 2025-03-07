@@ -177,8 +177,7 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
     version   = "latest"
   }
 }
-
-resource "azurerm_resource_group" "rg_test0001" {
+resource "azurerm_resource_group" "rg_test" {
   name     = "rg-test0001"
   location = "uksouth"
 }
