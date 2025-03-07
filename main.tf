@@ -25,6 +25,9 @@ data "azurerm_key_vault" "azure_kv" {
 resource "azurerm_resource_group" "anoopp_rg01" {
   name     = "anoopp-rg01"
   location = "uksouth"
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
 
   lifecycle {
     ignore_changes = [tags]
@@ -36,7 +39,8 @@ resource "azurerm_virtual_network" "rax_vnet" {
   address_space       = ["10.1.0.0/24"]
   location            = "East US"
   resource_group_name = "anoopp-rg01"
-
+  tags = {
+  "Deployed via" = "Terraform AI Agent" }
   lifecycle {
     ignore_changes = [tags]
   }
@@ -47,6 +51,7 @@ resource "azurerm_subnet" "subnet1" {
   resource_group_name  = "anoopp-rg01"
   virtual_network_name = azurerm_virtual_network.rax_vnet.name
   address_prefixes     = ["10.1.0.0/26"]
+
 }
 
 resource "azurerm_subnet" "subnet2" {
@@ -71,6 +76,13 @@ resource "azurerm_resource_group" "anoopp_rg06" {
 resource "azurerm_resource_group" "rg-standard" {
   name     = "rg-standard"
   location = "uksouth"
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_virtual_network" "vnet-standard" {
@@ -78,6 +90,8 @@ resource "azurerm_virtual_network" "vnet-standard" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg-standard.location
   resource_group_name = azurerm_resource_group.rg-standard.name
+  tags                = { "Deployed via" = "Terraform AI Agent" }
+  lifecycle { ignore_changes = [tags] }
 }
 
 resource "azurerm_subnet" "subnet-standard" {
@@ -103,6 +117,13 @@ resource "azurerm_network_security_group" "nsg-standard" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" {
@@ -116,6 +137,13 @@ resource "azurerm_public_ip" "pip-standard" {
   resource_group_name = azurerm_resource_group.rg-standard.name
   allocation_method   = "Dynamic"
   sku                 = "Basic"
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_network_interface" "nic-standard" {
@@ -128,6 +156,13 @@ resource "azurerm_network_interface" "nic-standard" {
     subnet_id                     = azurerm_subnet.subnet-standard.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.pip-standard.id
+  }
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
   }
 }
 
@@ -176,43 +211,27 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
     sku       = "server"
     version   = "latest"
   }
+  tags = {
+    "Deployed via" = "Terraform AI Agent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
-resource "azurerm_resource_group" "rg_test" {
-  name     = "rg-test0001"
+
+
+resource "azurerm_resource_group" "sumit_test02" {
+  name     = "sumit-test02"
   location = "uksouth"
-}
 
-# resource "azurerm_resource_group" "rg_test" {
-#   name     = "rg-test0001"
-#   location = "uksouth"
-# }
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
 
-resource "azurerm_resource_group" "akash_rg001" {
-  name     = "akash-rg001"
-  location = "uksouth"
-}
-
-resource "azurerm_resource_group" "akash_rg002" {
-  name     = "akash-rg002"
-  location = "uksouth"
-}
-resource "azurerm_resource_group" "akash_005" {
-  name     = "akash-005"
-  location = "uksouth"
-}
-
-
-resource "azurerm_resource_group" "akash_rg" {
-  name     = "akash-test01"
-  location = "UK South"
-}
-
-resource "azurerm_resource_group" "amit_test02" {
-  name     = "amit-test02"
-  location = "uksouth"
-}
-
-resource "azurerm_resource_group" "sumit_test01" {
-  name     = "sumit-test01"
-  location = "uksouth"
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
 }
