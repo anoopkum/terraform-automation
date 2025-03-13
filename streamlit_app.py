@@ -36,11 +36,14 @@ def run_app():
     # Show code editor (always visible after generation)
     if st.session_state.modified_code:
         st.subheader("Generated Terraform Code (Modify if required)")
+        modified_code_length = len(st.session_state.modified_code.split("\n"))  # Count lines instead of characters
+        dynamic_height = min(800, max(100, modified_code_length * 20))  # Adjust height based on lines
+
         modified_code = st.text_area(
-            "Terraform Code",
-            value=st.session_state.modified_code,
-            height=min(500, max(100, len(st.session_state.modified_code) // 2)),
-            key="code_editor"
+        "Terraform Code",
+        value=st.session_state.modified_code,
+        height=dynamic_height,
+        key="code_editor"
         )
         # Update the modified code in session state
         st.session_state.modified_code = modified_code
