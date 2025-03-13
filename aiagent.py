@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import logging
 import subprocess
 import uuid
-
+import streamlit as st  # Import Streamlit library
 # Load environment variables from .env file
 load_dotenv()
 logging.basicConfig(filename='terraform.log', level=logging.INFO)
@@ -27,15 +27,15 @@ openai.api_key = os.getenv("AZURE_API_KEY")
 
 def generate_terraform_code(user_input):
     prompt = f"Generate Terraform code for Azure to create: {user_input}. " \
-             "Output ONLY the HCL code wrapped in triple backticks with 'hcl' as the language (NO instructions)."
-             
+             "Ensure the code lifecycle block has ignore_changes = [tags] and a tag Deploy_via = TerraformAIAgent to all resources."
+            #  "Generate as per the best practices and standards to use variables for variables.tf and and values for terraform.tfvars"    
+                    
     response = openai.ChatCompletion.create(
         deployment_id="o3-mini",  # Update with your deployment id if different
         messages=[
-            {"role": "system", "content": "You are a Terraform expert generating valid Azure Terraform code. Follow Terraform v1.0+ and AzureRM provider v3.0+ standards. Output only HCL code inside triple backticks (```hcl ... ```), without provider blocks, extra resources, or explanations. Adhere to the official guidelines: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs."},
+            {"role": "system", "content": "You are a Terraform expert generating valid Azure Terraform code. Follow Terraform v1.0+ and AzureRM provider v3.0+ standards. Output only HCL code inside triple backticks (```hcl ... ```), without provider blocks, extra resources, or explanations.Ensure correctness per official guidelines (https://registry.terraform.io/providers/hashicorp/azurerm/latest) and validate for production readiness."},
             {"role": "user", "content": prompt}
         ]
-        # max_tokens=500
     )
     return response.choices[0].message.content.strip()
 
@@ -94,67 +94,6 @@ def generate_unique_terraform_code(user_input):
     # Join blocks with proper spacing
     modified_code = "\n\n".join(modified_blocks)
     return modified_code
-
-def verify_generated_code(code):
-    """
-    Verifies the generated Terraform code using terraform fmt and basic validation
-    """
-    import os
-    import tempfile
-    
-    # Create a temporary directory
-    temp_dir = tempfile.mkdtemp()
-    temp_file = os.path.join(temp_dir, "main.tf")
-    
-    try:
-        # Write the code to a temporary .tf file
-        with open(temp_file, "w") as f:
-            f.write(code)
-        
-        # Run terraform fmt
-        fmt_out, fmt_err = run_command(f"terraform fmt {temp_file}")
-        if fmt_err:
-            return f"Formatting error: {fmt_err}"
-        
-        # Basic syntax validation (doesn't require init)
-        validate_out, validate_err = run_command(f"terraform validate -json {temp_file}")
-        if validate_err:
-            return f"Validation error: {validate_err}"
-        
-        # Run TFLint (doesn't require terraform init)
-        tflint_out, tflint_err = run_command(f"cd {temp_dir} && tflint")
-        if tflint_err:
-            return f"TFLint error: {tflint_err}"
-        
-        # Read the formatted code
-        with open(temp_file, "r") as f:
-            final_code = f.read()
-        
-        return final_code
-        
-    finally:
-        # Clean up temporary directory
-        import shutil
-        shutil.rmtree(temp_dir, ignore_errors=True)
-def save_terraform_code(code):
-    """
-    Extracts HCL block (if wrapped in ```hcl ... ```) and saves it to main.tf.
-    """
-    hcl_code = code
-    pattern = r"```hcl\s*(.*?)\s*```"
-    match = re.search(pattern, code, re.DOTALL)
-    if match:
-        hcl_code = match.group(1)
-    output_file = "main.tf"
-    current_content = ""
-    if os.path.exists(output_file):
-        with open(output_file, "r") as f:
-            current_content = f.read()
-    new_content = current_content + "\n" + hcl_code + "\n"
-    with open(output_file, "w") as f:
-        f.write(new_content)
-    print("Appended HCL code and updated main.tf.")
-
 def extract_hcl(content):
     """
     Extracts only the HCL content between ```hcl and ``` markers.
@@ -165,7 +104,25 @@ def extract_hcl(content):
     if match:
         return match.group(1)
     return content
-
+# def save_terraform_code(code):
+#     """
+#     Extracts the HCL block (if wrapped in triple backticks) and saves it to main.tf.
+#     """
+#     hcl_code = extract_hcl(code)  # Extract HCL code
+#     pattern = r"```hcl\s*(.*?)\s*```"
+#     match = re.search(pattern, code, re.DOTALL)
+#     if match:
+#         hcl_code = match.group(1)
+#     output_file = "main.tf"
+#     current_content = ""
+#     if os.path.exists(output_file):
+#         with open(output_file, "r") as f:
+#             current_content = f.read()
+#     new_content = current_content + "\n" + hcl_code + "\n"
+#     with open(output_file, "w") as f:
+#         f.write(new_content)
+#     print("Appended HCL code and updated main.tf.")
+        
 def run_command(command):
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
     return result.stdout, result.stderr
@@ -180,11 +137,15 @@ def fix_terraform_code(error):
         ]
         # max_tokens=300
     )
-    fixed = response.choices[0].message.content.strip()
+    fixed = response.choices[0].message['content'].strip()
     print("Fixed code:", fixed)  # Debug print
     return fixed
 
 def auto_commit_and_push():
+    """
+    Commits and pushes main.tf to the 'test' branch, then creates and auto-merges a pull request
+    using GitHub CLI. Adjust the commands as needed for your workflow.
+    """
     commit_message = "Auto-update Terraform configuration"
     stdout, stderr = run_command("git add main.tf")
     if stderr:
@@ -196,38 +157,121 @@ def auto_commit_and_push():
     if stderr:
         logging.error(f"Git push error: {stderr}")
     else:
-        print("Committed and pushed updated code to test branch.")
+        print("Committed and pushed updated code to 'test' branch.")
 
-def validate_and_fix():
-        # Format the code with terraform fmt
+    # Create a pull request using GitHub CLI
+    pr_create_cmd = (
+        "gh pr create --title 'Auto PR for Terraform update' "
+        "--body 'Automated PR generated by Terraform AI Agent' --base main --head test"
+    )
+    stdout, stderr = run_command(pr_create_cmd)
+    if stderr:
+        logging.error(f"GitHub PR creation error: {stderr}")
+    else:
+        print("Pull request created.")
+    # Auto-merge the PR; adjust flags per your merge strategy
+    pr_merge_cmd = "gh pr merge --squash --delete-branch --auto"
+    stdout, stderr = run_command(pr_merge_cmd)
+    if stderr:
+        logging.error(f"GitHub PR merge error: {stderr}")
+    else:
+        print("Pull request merged and branch deleted.")
+
+# Consolidated function to extract, verify, and merge code changes
+def process_and_commit():
+    """
+    Extracts HCL code (if wrapped in triple backticks), saves it to main.tf,
+    validates and fixes Terraform code (using terraform fmt, init, validate, & TFLint) once,
+    and finally commits and merges the changes via GitHub CLI to trigger GitHub Actions.
+    """
+    # Extract HCL content from the modified code
+    code = extract_hcl(st.session_state.modified_code)
+
+    # Save the extracted code to main.tf
+    output_file = "main.tf"
+    with open(output_file, "a") as f:
+        f.write("\n" + code + "\n")
+    print("Appended HCL code to main.tf.")
+
+    # Format and initialize Terraform
     run_command("terraform fmt")
-    # Initialize Terraform
     run_command("terraform init")
-    
-    # Validate syntax
+
+    # Validate Terraform syntax
     _, validate_err = run_command("terraform validate")
     if validate_err:
         logging.error(f"Validation Error: {validate_err}")
         fixed_code = fix_terraform_code(validate_err)
-        save_terraform_code(fixed_code)
-        validate_and_fix()  # Recursive retry
-    
+        with open(output_file, "w") as f:
+            f.write(fixed_code)
+        return "Validation error fixed. Please re-run the verification process."
+
     # Lint with TFLint
     _, tflint_err = run_command("tflint --chdir=.")
     if tflint_err:
         logging.error(f"Linting Error: {tflint_err}")
         fixed_code = fix_terraform_code(tflint_err)
-        save_terraform_code(fixed_code)
-        validate_and_fix()
+        with open(output_file, "w") as f:
+            f.write(fixed_code)
+        return "Linting error fixed. Please re-run the verification process."
+
+    # If all checks pass, commit, push, and merge the code
     auto_commit_and_push()
+    return code
+
+def verify_terraform_code():
+    """
+    Verifies the Terraform code without saving it to main.tf.
+    Runs terraform formatting, initialization, validation, and linting.
+    """
+    # Extract HCL content from the modified code
+    code = extract_hcl(st.session_state.modified_code)
+
+    # Format and initialize Terraform
+    run_command("terraform fmt")
+    run_command("terraform init")
+
+    # Validate Terraform syntax
+    _, validate_err = run_command("terraform validate")
+    if validate_err:
+        logging.error(f"Validation Error: {validate_err}")
+        fixed_code = fix_terraform_code(validate_err)
+        return "Validation error fixed. Please re-run the verification process."
+
+    # Lint with TFLint
+    _, tflint_err = run_command("tflint --chdir=.")
+    if tflint_err:
+        logging.error(f"Linting Error: {tflint_err}")
+        fixed_code = fix_terraform_code(tflint_err)
+        return "Linting error fixed. Please re-run the verification process."
+
+    return code
+
+def save_and_deploy():
+    """
+    Saves the verified Terraform code to main.tf and triggers deployment.
+    """
+    # Extract HCL content from the modified code
+    code = extract_hcl(st.session_state.final_code)
+
+    # Save the extracted code to main.tf
+    output_file = "main.tf"
+    with open(output_file, "a") as f:
+        f.write("\n" + code + "\n")
+    print("Appended HCL code to main.tf.")
+
+    # Commit, push, and merge the code
+    auto_commit_and_push()
+    return code
 
 def check_deployment_status():
     """
-    Checks the status of the GitHub Actions deployment
-    Returns a message indicating success or failure with details
+    Checks the status of the GitHub Actions deployment.
+    Returns "Apply complete!" if terraform apply -autoapprove completed successfully,
+    or an error message if the run failed or has issues.
     """
     try:
-        # Run git command to get the latest action run status
+        # Run GitHub CLI command to get the latest action run status
         cmd = "gh run list --limit 1 --json status,conclusion,name"
         output, error = run_command(cmd)
         
@@ -244,7 +288,8 @@ def check_deployment_status():
             
             if status == "completed":
                 if conclusion == "success":
-                    return "Deployment successful"
+                    # A successful run means terraform apply -autoapprove has finished successfully.
+                    return "Apply complete!"
                 else:
                     return f"Deployment failed with status: {conclusion}"
             else:
@@ -257,12 +302,12 @@ def check_deployment_status():
 
 def main():
     try:
-        user_input = input("Enter what Azure infrastructure to create (e.g., create a resource group name \"anoop-rg000001\"): ")
-        terraform_code = generate_unique_terraform_code(user_input)
+        user_input = input("Enter what Azure infrastructure to create (e.g., create a resource group name \"rg01\"): ")
+        terraform_code = generate_terraform_code(user_input)
         print("\nGenerated Terraform Code:\n")
         print(terraform_code)
-        save_terraform_code(terraform_code)
-        validate_and_fix()
+        process_and_commit(terraform_code)
+        # process_and_commit()
     except Exception as e:
         print(f"An error occurred while generating Terraform code: {e}")
     except (EOFError, KeyboardInterrupt):

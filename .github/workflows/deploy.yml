@@ -3,7 +3,7 @@ name: Terraform Deployment
 on:
   push:
     branches:
-      - test
+      - aiagent-demo
 
 jobs:
   deploy:
