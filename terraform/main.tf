@@ -231,7 +231,8 @@ resource "azurerm_resource_group" "sumit_test02" {
 
   lifecycle {
     ignore_changes = [
-      tags,
+      tags
     ]
   }
 }
+

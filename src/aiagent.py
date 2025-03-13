@@ -28,7 +28,7 @@ openai.api_key = os.getenv("AZURE_API_KEY")
 def generate_terraform_code(user_input):
     prompt = f"Generate Terraform code for Azure to create: {user_input}. " \
              "Ensure the code lifecycle block has ignore_changes = [tags] and a tag Deploy_via = TerraformAIAgent to all resources." \
-             "Generate as per the best practices and standards to use variables for variables.tf and and values for terraform.tfvars"    
+             "Generate as per the best practices and standards to use main.tf for resource creation and variables for variables.tf and and values for terraform.tfvars and mention the file names in the comments."    
                     
     response = openai.ChatCompletion.create(
         deployment_id="o3-mini",  # Update with your deployment id if different
@@ -50,7 +50,7 @@ def generate_unique_terraform_code(user_input):
     Generates Terraform code and handles duplicate resources
     """
     terraform_code = generate_terraform_code(user_input)
-    output_file = "main.tf"
+    output_file = "..\terraform\main.tf"
     existing_content = ""
     if os.path.exists(output_file):
         with open(output_file, "r") as f:
@@ -230,34 +230,75 @@ def verify_terraform_code():
 
     return code
 
+import os
+import re
+import os
+import re
+
+import os
+import re
+
+import os
+import re
+
 def save_and_deploy():
     """
-    Saves the verified Terraform code to main.tf, variables.tf, and terraform.tfvars, and triggers deployment.
+    Appends the verified Terraform code dynamically into main.tf, variables.tf, and terraform.tfvars files
+    under the ../terraform directory.
     """
     # Extract HCL content from the final code
     code = extract_hcl(st.session_state.final_code)
-
-    # Split the code into main.tf, variables.tf, and terraform.tfvars
-    main_tf_match = re.search(r'(?<=main.tf\n)(.*?)(?=\nvariables.tf)', code, re.DOTALL)
-    variables_tf_match = re.search(r'(?<=variables.tf\n)(.*?)(?=\nterraform.tfvars)', code, re.DOTALL)
-    terraform_tfvars_match = re.search(r'(?<=terraform.tfvars\n)(.*)', code, re.DOTALL)
-
-    if not main_tf_match or not variables_tf_match or not terraform_tfvars_match:
-        raise ValueError("Failed to parse the generated Terraform code. Please ensure the code contains sections for main.tf, variables.tf, and terraform.tfvars.")
-
-    main_tf = main_tf_match.group(1)
-    variables_tf = variables_tf_match.group(1)
-    terraform_tfvars = terraform_tfvars_match.group(1)
-
-    # Save the extracted code to respective files
-    with open("../terraform/main.tf", "w") as f:
-        f.write(main_tf)
-    with open("../terraform/variables.tf", "w") as f:
-        f.write(variables_tf)
-    with open("../terraform/terraform.tfvars", "w") as f:
-        f.write(terraform_tfvars)
-    print("Saved generated code to main.tf, variables.tf, and terraform.tfvars.")
-
+    
+    # Define file paths outside src directory
+    terraform_dir = "../terraform"
+    os.makedirs(terraform_dir, exist_ok=True)
+    
+    # Use a more specific regex pattern to extract code blocks with their file markers
+    # This pattern accounts for the exact format provided in the example
+    code_blocks = re.split(r'```hcl', code)
+    
+    # Skip the first element which is likely empty or contains text before the first code block
+    if code_blocks and not code_blocks[0].strip():
+        code_blocks = code_blocks[1:]
+    
+    # Process each code block
+    for block in code_blocks:
+        if not block.strip():
+            continue
+            
+        # Split at the end of the code block
+        parts = block.split('```', 1)
+        if len(parts) != 2:
+            print(f"Warning: Malformed code block: {block[:50]}...")
+            continue
+            
+        block_content = parts[0].strip()
+        
+        # Extract the filename from the first line (e.g., "// main.tf")
+        lines = block_content.split('\n')
+        if not lines:
+            continue
+            
+        file_marker = lines[0].strip()
+        if not file_marker.startswith('//'):
+            print(f"Warning: Missing file marker, expected '// filename.tf', got: {file_marker}")
+            continue
+            
+        filename = file_marker[2:].strip()  # Remove the '//' prefix and whitespace
+        content_lines = lines[1:]  # Skip the first line which contains the filename
+        content = '\n'.join(content_lines)
+        
+        # Save content to the appropriate file
+        if filename in ["main.tf", "variables.tf", "terraform.tfvars"]:
+            file_path = os.path.join(terraform_dir, filename)
+            
+            with open(file_path, "a") as f:
+                f.write("\n" + content + "\n")
+            
+            print(f"Successfully appended content to {filename} in {terraform_dir}")
+        else:
+            print(f"Skipping unexpected file: {filename}")
+    
     # Commit, push, and merge the code
     auto_commit_and_push()
     return code
