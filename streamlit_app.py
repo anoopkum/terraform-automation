@@ -1,20 +1,10 @@
 import streamlit as st
-from dotenv import load_dotenv
-import os
 from aiagent import (
-    generate_unique_terraform_code,
-    verify_generated_code,
-    validate_and_fix,
-    save_terraform_code,
+    generate_terraform_code,
+    verify_terraform_code,
+    save_and_deploy,
     check_deployment_status
 )
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import ResourceManagementClient
-
-# Initialize Azure credentials and Resource Management Client
-credential = DefaultAzureCredential()
-subscription_id = os.getenv("AZURE_SUBSCRIPTION_ID")  # Replace with your subscription ID if different
-resource_client = ResourceManagementClient(credential, subscription_id)
 
 def run_app():
     st.title("Terraform AI Agent")
@@ -28,8 +18,9 @@ def run_app():
         st.session_state.final_code = ""
     
     # Get user input
-    user_input = st.text_input(
-        "Enter what Azure infrastructure to create (e.g. create a resource group name \"rg01\"):"
+    user_input = st.text_area(
+        "Enter what Azure infrastructure to create (e.g. create a resource group name \"rg01\"):",
+        height=100
     )
     
     # Generate Code Section
@@ -38,7 +29,7 @@ def run_app():
             st.error("Please enter a valid description.")
         else:
             with st.spinner("Generating Terraform code..."):
-                code = generate_unique_terraform_code(user_input)
+                code = generate_terraform_code(user_input)
                 st.session_state.generated_code = code
                 st.session_state.modified_code = code
     
@@ -48,7 +39,7 @@ def run_app():
         modified_code = st.text_area(
             "Terraform Code",
             value=st.session_state.modified_code,
-            height=500,
+            height=min(500, max(100, len(st.session_state.modified_code) // 2)),
             key="code_editor"
         )
         # Update the modified code in session state
@@ -58,36 +49,43 @@ def run_app():
         st.subheader("Verify Terraform Code")
         if st.button("Verify Terraform Code"):
             with st.spinner("Verifying code..."):
-                verification_result = verify_generated_code(st.session_state.modified_code)
+                verification_result = verify_terraform_code()
             
-            if verification_result.startswith(("Formatting error", "Terraform init error", "Validation error", "TFLint error")):
+            if verification_result and verification_result.startswith(("Validation error", "Linting error")):
                 st.error(verification_result)
             else:
                 st.success("Terraform code verified successfully.")
                 st.session_state.final_code = verification_result
                 st.subheader("Final Verified Terraform Code")
-                st.text_area(
-                    "Final Terraform Code",
-                    value=verification_result,
-                    height=500,
-                    key="final_code_viewer"
+                st.code(
+                    verification_result,
+                    language="hcl"  # Use HCL for Terraform syntax highlighting
                 )
         
         # Deploy Section
         if st.session_state.final_code:
             st.subheader("Save and Deploy")
             if st.button("Save and Deploy"):
-                with st.spinner("Saving code and triggering deployment..."):
-                    save_terraform_code(st.session_state.final_code)
-                    st.success("Terraform code saved to main.tf. Deployment in progress...")
-                # Add deployment status checking
+                with st.spinner("Triggering deployment..."):
+                    save_and_deploy()
+                    st.success("Deployment triggered!")
+                
+                # Display deployment status until a final outcome is reached
+                status_placeholder = st.empty()
+                status_placeholder.info("Deployment is in progress. Please wait...")
+
                 with st.spinner("Checking deployment status..."):
-                    deployment_status = check_deployment_status()
-                    if "Deployment failed" in deployment_status:
-                        st.error(deployment_status)
-                    elif "Deployment successful" in deployment_status:
-                        st.success(deployment_status)
-                    else:
-                        st.warning("Deployment status unknown. Please check GitHub Actions.")
+                    while True:
+                        deployment_status = check_deployment_status()
+                        status_lower = deployment_status.lower()
+                        if "apply complete!" in status_lower:
+                            status_placeholder.success("Deployment Successful!")
+                            break
+                        elif "error:" in status_lower:
+                            status_placeholder.error(f"Deployment Failed: {deployment_status}")
+                            break
+                        else:
+                            status_placeholder.info("Deployment is in progress. Please wait...")
+
 if __name__ == "__main__":
     run_app()
