@@ -235,48 +235,15 @@ resource "azurerm_resource_group" "sumit_test02" {
     ]
   }
 }
-// main.tf
-resource "azurerm_resource_group" "demo-rg" {
-  name     = var.resource_group_name
-  location = var.resource_group_location
+resource "azurerm_resource_group" "rg_demo01" {
+  name     = "rg-demo01"
+  location = "uksouth"
 
-  tags = merge(
-    var.tags,
-    {
-      Deploy_via = "TerraformAIAgent"
-    }
-  )
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
 
   lifecycle {
     ignore_changes = [tags]
   }
-}
-
--------------------------------------------------
-
-// variables.tf
-variable "resource_group_name" {
-  description = "The name of the resource group."
-  type        = string
-}
-
-variable "resource_group_location" {
-  description = "The Azure region for the resource group."
-  type        = string
-}
-
-variable "tags" {
-  description = "A map of additional tags to apply to resources."
-  type        = map(string)
-  default     = {}
-}
-
--------------------------------------------------
-
-// terraform.tfvars
-resource_group_name     = "aiagent-demo01"
-resource_group_location = "uksouth"
-
-tags = {
-  environment = "demo"
 }
