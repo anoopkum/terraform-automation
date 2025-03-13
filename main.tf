@@ -235,3 +235,18 @@ resource "azurerm_resource_group" "sumit_test02" {
     ]
   }
 }
+
+resource "azurerm_resource_group" "rg_demo01" {
+  name     = "rg-demo01"
+  location = "uksouth"
+
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
+}
