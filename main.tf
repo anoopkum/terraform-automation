@@ -250,3 +250,16 @@ resource "azurerm_resource_group" "rg_demo01" {
     ]
   }
 }
+
+resource "azurerm_resource_group" "rg_demo02" {
+  name     = "rg-demo02"
+  location = "uksouth"
+
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
