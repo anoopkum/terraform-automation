@@ -61,17 +61,6 @@ resource "azurerm_subnet" "subnet2" {
   address_prefixes     = ["10.1.0.64/26"]
 }
 
-resource "azurerm_resource_group" "anoopp_rg06" {
-  name     = "anoopp-rg06"
-  location = "uksouth"
-  tags = {
-    "Deployed via" = "Terraform AI Agent"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
 
 resource "azurerm_resource_group" "rg-standard" {
   name     = "rg-standard"
@@ -221,58 +210,4 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
 }
 
 
-resource "azurerm_resource_group" "sumit_test02" {
-  name     = "sumit-test02"
-  location = "uksouth"
 
-  tags = {
-    Deploy_via = "TerraformAIAgent"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "azurerm_resource_group" "rg_demo01" {
-  name     = "rg-demo01"
-  location = "uksouth"
-
-  tags = {
-    Deploy_via = "TerraformAIAgent"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      tags,
-    ]
-  }
-}
-
-resource "azurerm_resource_group" "rg_demo02" {
-  name     = "rg-demo02"
-  location = "uksouth"
-
-  tags = {
-    Deploy_via = "TerraformAIAgent"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "rg_demo_01" {
-  name     = "rg-demo-01"
-  location = "uksouth"
-
-  tags = {
-    Deploy_via = "TerraformAIAgent_demo"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}

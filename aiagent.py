@@ -27,8 +27,8 @@ openai.api_key = os.getenv("AZURE_API_KEY")
 
 def generate_terraform_code(user_input):
     prompt = f"Generate Terraform code for Azure to create: {user_input}. " \
-             "Ensure the code lifecycle block has ignore_changes = [tags] and a tag Deploy_via = TerraformAIAgent to all resources."
-            #  "Generate as per the best practices and standards to use variables for variables.tf and and values for terraform.tfvars"    
+             "Ensure the code lifecycle block has ignore_changes = [tags] and a tag Deploy_via = TerraformAIAgent to all resources." \
+             "Generate as per the best practices and standards to use variables for variables.tf and and values for terraform.tfvars"    
                     
     response = openai.ChatCompletion.create(
         deployment_id="o3-mini",  # Update with your deployment id if different
