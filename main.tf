@@ -208,22 +208,15 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
     ignore_changes = [tags]
   }
 }
-
-
-
-
-// main.tf
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.resource_group_location
+resource "azurerm_resource_group" "rg_demo_01" {
+  name     = "rg-demo-01"
+  location = "uksouth"
 
   tags = {
     Deploy_via = "TerraformAIAgent"
   }
 
   lifecycle {
-    ignore_changes = [
-      tags,
-    ]
+    ignore_changes = [tags]
   }
 }
