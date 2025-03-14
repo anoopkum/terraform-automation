@@ -211,3 +211,19 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
 
 
 
+
+// main.tf
+resource "azurerm_resource_group" "rg" {
+  name     = var.resource_group_name
+  location = var.resource_group_location
+
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
+}
