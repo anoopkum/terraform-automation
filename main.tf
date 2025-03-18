@@ -233,3 +233,16 @@ resource "azurerm_resource_group" "rg_demo_aiagent" {
     ignore_changes = [tags]
   }
 }
+
+resource "azurerm_resource_group" "ramakant" {
+  name     = "ramakant-rg"
+  location = "eastus"
+
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
+}
