@@ -220,3 +220,17 @@ resource "azurerm_resource_group" "rg_demo_01" {
     ignore_changes = [tags]
   }
 }
+resource "azurerm_resource_group" "aiagent_rg-01" {
+  name     = "aiagent-rg-01"
+  location = "uksouth"
+
+  tags = {
+    Deploy_via = "TerraformAIAgent"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
+}
