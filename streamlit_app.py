@@ -27,6 +27,7 @@ def run_app():
     if st.button("Generate Terraform Code"):
         if user_input.strip() == "":
             st.error("Please enter a valid description.")
+            st.warning("Please enter a valid infrastructure description.")
         else:
             with st.spinner("Generating Terraform code..."):
                 code = generate_terraform_code(user_input)

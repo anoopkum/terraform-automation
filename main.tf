@@ -208,31 +208,3 @@ resource "azurerm_linux_virtual_machine" "vm-standard" {
     ignore_changes = [tags]
   }
 }
-
-resource "azurerm_resource_group" "aiagent_rg" {
-  name     = "aiagent-demo-rg"
-  location = "uksouth"
-
-  tags = {
-    Deploy_via = "TerraformAIAgent"
-  }
-
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-resource "azurerm_resource_group" "aiagent-rg" {
-  name     = "aiagent-terraform-rg"
-  location = "uksouth"
-
-  tags = {
-    Deploy_via = "TerraformAIAgent"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
